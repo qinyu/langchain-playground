@@ -64,7 +64,7 @@ def _get_blog_documents(blog_url, lang):
 
 
 def set_openai_key(key):
-    pass #os.environ["OPENAI_API_KEY"] = key
+    os.environ["OPENAI_API_KEY"] = key
 
 
 def summarize_blog(url, lang, concise):
