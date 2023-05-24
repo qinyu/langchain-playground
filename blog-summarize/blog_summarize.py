@@ -71,7 +71,7 @@ def summarize_blog(url, lang, concise):
     """Summarize a blog post."""
     map_prompt = _get_prompt(prompt_template, lang, concise)
     combine_prompt = _get_prompt(prompt_template, lang, concise)
-    llm = OpenAI(temperature=0)    
+    llm = OpenAI(temperature=0)
     chain = load_summarize_chain(
         llm,
         chain_type="map_reduce",
