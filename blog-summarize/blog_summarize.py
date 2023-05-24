@@ -5,11 +5,17 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI
 from langchain.prompts import PromptTemplate
+import os
 
 prompt_template = """
 Write a summary of the following:
 {text}
-SUMMARY IN"""
+{concise}SUMMARY IN {lang}: """
+
+CHINESE = "Chinese"
+ENGLISH = "English"
+CHINESE_SEPARATORS = ["。", "？", "！", "\n", "\n\n"]
+ENGLISH_SEPARATORS = [".", "?", "!", "\n", "\n\n"]
 
 
 def _build_metadata(soup: Any, url: str) -> dict:
@@ -26,6 +32,7 @@ def _build_metadata(soup: Any, url: str) -> dict:
 
 class HugoPostLoader(WebBaseLoader):
     """Loader that loads Hugo blog posts."""
+
     def __init__(self, web_path: str):
         # Only support one page for now
         super().__init__(web_path=web_path)
@@ -41,21 +48,35 @@ class HugoPostLoader(WebBaseLoader):
             return super().load()
 
 
-def _get_map_prompt(prompt_template, lang="Chinese"):
-    return PromptTemplate(template=prompt_template+f" {lang}:",
+def _get_prompt(prompt_template, lang, concise):
+    concise = " " if concise else "CONCISE "
+    return PromptTemplate(template=prompt_template,
+                          partial_variables={"lang": lang,
+                                             "concise": concise},
                           input_variables=["text"])
 
 
-def _get_blog_documents(blog_url):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500)
+def _get_blog_documents(blog_url, lang):
+    separators = CHINESE_SEPARATORS if lang == CHINESE else ENGLISH_SEPARATORS
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500,
+                                                   separators=separators)
     return HugoPostLoader(blog_url).load_and_split(text_splitter)
 
 
-def summarize_blog(url, lang):
+def set_openai_key(key):
+    pass #os.environ["OPENAI_API_KEY"] = key
+
+
+def summarize_blog(url, lang, concise):
     """Summarize a blog post."""
-    map_prompt = _get_map_prompt(prompt_template, lang)
-    llm = OpenAI(temperature=0)
+    map_prompt = _get_prompt(prompt_template, lang, concise)
+    combine_prompt = _get_prompt(prompt_template, lang, concise)
+    llm = OpenAI(temperature=0)    
     chain = load_summarize_chain(
-        llm, chain_type="map_reduce", map_prompt=map_prompt, verbose=True)
-    data = _get_blog_documents(url)
+        llm,
+        chain_type="map_reduce",
+        map_prompt=map_prompt,
+        combine_prompt=combine_prompt,
+        verbose=True)
+    data = _get_blog_documents(url, lang)
     return chain.run(data)
