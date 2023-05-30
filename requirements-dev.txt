@@ -1,0 +1,15 @@
+langchain
+streamlit
+openai
+bs4
+tiktoken
+chroma
+chromadb
+sentence_transformers # by HuggingFaceEmbeddings
+unstructured # by UnstructuredPdfLoader
+pdf2image # by UnstructuredPdfLoader
+gpt4all # by GPT4All
+pygpt4all # by GPT4All
+pyllamacpp=2.2.0 # by GPT4All 
+fastapi # by FastAPI
+unicorn # by FastAPI
