@@ -29,7 +29,8 @@ def load_from_original_book(book_path):
     print("Loaded {num} documents".format(num=len(docs)))
     print("Example documents:")
     for doc in docs[:5]:
-        print("{start}..{end}".format(start=doc.page_content[:50], end=doc.page_content[-50:]))
+        print("{start}..{end}".format(start=doc.page_content[:50],
+                                      end=doc.page_content[-50:]))
         print(len(doc.page_content))
         # print(doc.metadata)
     return docs
